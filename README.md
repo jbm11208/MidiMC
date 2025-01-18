@@ -1,3 +1,8 @@
+Modified to work with "Even More Instruments!" Minecraft mod.
+You must have the GUI to play music with the harp instrument before opening a midi, pressing play, and tabbing back into Minecraft.
+Included is a Python script that will transpose any midis placed in the same folder as it.
+Midis may not sound correct before transposing.
+
 ![LyreBot Logo](./LyreBot/Resources/Lyre.png)
 
 LyreBot is a program which converts a MIDI input or file to a series of key presses for the Lyre. Any MIDI input works with this script (a MIDI keyboard, a virtual MIDI channel, etc), as well as [Standard MIDI Files (SMF)](https://www.midi.org/specifications/category/smf-specifications).
