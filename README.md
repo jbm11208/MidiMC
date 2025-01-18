@@ -1,3 +1,5 @@
+Modified for use with "Even More Instruments!" Minecraft mod.
+
 ![LyreBot Logo](./LyreBot/Resources/Lyre.png)
 
 LyreBot is a program which converts a MIDI input or file to a series of key presses for the Lyre. Any MIDI input works with this script (a MIDI keyboard, a virtual MIDI channel, etc), as well as [Standard MIDI Files (SMF)](https://www.midi.org/specifications/category/smf-specifications).
