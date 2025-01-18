@@ -13,6 +13,9 @@ using LyreBot.Models;
 using InputDevice = Melanchall.DryWetMidi.Devices.InputDevice;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Text;
+using System.Runtime.InteropServices;
+
 
 namespace LyreBot.ViewModels
 {
@@ -456,15 +459,34 @@ namespace LyreBot.ViewModels
                 playTimer.Start();
             }
         }
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
 
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
         private void PlayTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            if (ActionManager.IsWindowFocused("Genshin Impact") || PlayThroughSpeakers)
+            StringBuilder windowText = new StringBuilder(256);
+            IntPtr hWnd = GetForegroundWindow();
+
+            bool isMinecraftWindowFocused = false;
+
+            if (GetWindowText(hWnd, windowText, 256) > 0)
+            {
+                string currentWindowTitle = windowText.ToString();
+                if (currentWindowTitle.IndexOf("Minecraft", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    isMinecraftWindowFocused = true;
+                }
+            }
+
+            if (isMinecraftWindowFocused || PlayThroughSpeakers)
             {
                 playback.Start();
                 playTimer.Dispose();
             }
         }
+
 
         public void Previous()
         {

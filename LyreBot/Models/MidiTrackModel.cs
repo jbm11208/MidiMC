@@ -5,12 +5,13 @@ namespace LyreBot.Models
 {
     public class MidiTrackModel
     {
-        private bool _isChecked;
+        private bool _isChecked = true;
 
         public string TrackName { get; private set; }
         public TrackChunk Track { get; private set; }
-        public bool IsChecked {
-            get => _isChecked;
+        public bool IsChecked
+        {
+            get => true;
             set
             {
                 _isChecked = value;

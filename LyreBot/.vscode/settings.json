@@ -1,0 +1,5 @@
+{
+    "dotnet.preferCSharpExtension": true,
+    "dotnet.projects.enableAutomaticRestore": true,
+    "csharp.debug.symbolOptions.searchNuGetOrgSymbolServer": false
+}

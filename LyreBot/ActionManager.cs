@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Text;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Shapes;
@@ -25,42 +26,30 @@ namespace LyreBot
         // Dictionary of note IDs and a series of ints. In order: Scale, Fret, Key, Vibrato
         private static Dictionary<int, Keys> lyreNotes = new Dictionary<int, Keys>
         {
-            { 48, Keys.Z }, // C3
-            { 49, Keys.None }, // C#3
-            { 50, Keys.X }, // D3
-            { 51, Keys.None }, // D#3
-            { 52, Keys.C }, // E3
-            { 53, Keys.V }, // F3
-            { 54, Keys.None }, // F#3
-            { 55, Keys.B }, // G3
-            { 56, Keys.None }, // G#3
-            { 57, Keys.N }, // A3
-            { 58, Keys.None }, // A#3
-            { 59, Keys.M }, // B3
-            { 60, Keys.A }, // C4
-            { 61, Keys.None }, // C#4
-            { 62, Keys.S }, // D4
-            { 63, Keys.None }, // D#4
+            { 54, Keys.Z }, // F#3
+            { 55, Keys.X }, // G3
+            { 56, Keys.C }, // G#3
+            { 57, Keys.V }, // A3
+            { 58, Keys.B }, // A#3 ======
+            { 59, Keys.N }, // B3
+            { 60, Keys.M }, // C4
+            { 61, Keys.Oemcomma }, // C#4 ========
+            { 62, Keys.A }, // D4 =======
+            { 63, Keys.S }, // D#4
             { 64, Keys.D }, // E4
             { 65, Keys.F }, // F4
-            { 66, Keys.None }, // F#4
-            { 67, Keys.G }, // G4
-            { 68, Keys.None }, // G#4
-            { 69, Keys.H }, // A4
-            { 70, Keys.None }, // A#4
-            { 71, Keys.J }, // B4
-            { 72, Keys.Q }, // C5
-            { 73, Keys.None }, // C#5
-            { 74, Keys.W }, // D5
-            { 75, Keys.None }, // D#5
-            { 76, Keys.E }, // E5
-            { 77, Keys.R }, // F5
-            { 78, Keys.None }, // F#5
-            { 79, Keys.T }, // G5
-            { 80, Keys.None }, // G#5
-            { 81, Keys.Y }, // A5
-            { 82, Keys.None }, // A#5
-            { 83, Keys.U }, // B5
+            { 66, Keys.G }, // F#4
+            { 67, Keys.H }, // G4
+            { 68, Keys.J }, // G#4
+            { 69, Keys.K }, // A4
+            { 70, Keys.Q }, // A#4
+            { 71, Keys.W }, // B4
+            { 72, Keys.E }, // C5
+            { 73, Keys.R }, // C#5
+            { 74, Keys.T }, // D5
+            { 75, Keys.Y }, // D#5
+            { 76, Keys.U }, // E5
+            { 77, Keys.I }, // F5
         };
 
         public static int activeScale = 0;
@@ -119,6 +108,10 @@ namespace LyreBot
         [DllImport("user32.dll")]
         static extern void SwitchToThisWindow(IntPtr hWnd, bool fUnknown);
 
+        [DllImport("user32.dll")]
+
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
         /// <summary>
         /// Play a MIDI note inside Genshin Impact.
         /// </summary>
@@ -127,16 +120,30 @@ namespace LyreBot
         /// <param name="transposeNotes"> Should we transpose unplayable notes?.</param>
         public static bool PlayNote(NoteOnEvent note, bool enableVibrato, bool transposeNotes)
         {
-            if (!IsWindowFocused("Genshin Impact")) return false;
+            StringBuilder windowText = new StringBuilder(256);
+            IntPtr hWnd = GetForegroundWindow();
+
+            if (GetWindowText(hWnd, windowText, 256) > 0)
+            {
+                string currentWindowTitle = windowText.ToString();
+                if (currentWindowTitle.IndexOf("Minecraft", StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
 
             var noteId = (int)note.NoteNumber;
             if (!lyreNotes.ContainsKey(noteId))
             {
-                if (transposeNotes)
+            if (transposeNotes)
                 {
                     if (noteId < lyreNotes.Keys.First())
                     {
-                        noteId = lyreNotes.Keys.First() + noteId % 12;
+                       noteId = lyreNotes.Keys.First() + noteId % 12;
                     }
                     else if (noteId > lyreNotes.Keys.Last())
                     {
@@ -152,6 +159,7 @@ namespace LyreBot
             PlayNote(noteId, enableVibrato, transposeNotes);
             return true;
         }
+
 
         /// <summary>
         /// Play a MIDI note inside Genshin Impact.
@@ -189,12 +197,21 @@ namespace LyreBot
 
         public static bool OnSongPlay()
         {
-            genshinWindow = FindWindow("Genshin Impact");
-            //BringWindowToFront(genshinWindow);
-            SwitchToThisWindow(genshinWindow, true);
-            var hWnd = GetForegroundWindow();
-            if (genshinWindow.Equals(IntPtr.Zero) || !hWnd.Equals(genshinWindow)) return false;
-            return true;
+            StringBuilder windowText = new StringBuilder(256);
+            IntPtr hWnd = GetForegroundWindow();
+
+            if (GetWindowText(hWnd, windowText, 256) > 0)
+            {
+                string currentWindowTitle = windowText.ToString();
+                if (currentWindowTitle.IndexOf("Minecraft", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    //BringWindowToFront(hWnd);
+                    SwitchToThisWindow(hWnd, true);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static bool IsWindowFocused(IntPtr windowPtr)
